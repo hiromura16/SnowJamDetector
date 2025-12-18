@@ -1,0 +1,67 @@
+services:
+  backend:
+    build: ./backend
+    container_name: snowjam-backend
+    restart: unless-stopped
+    volumes:
+      - ./config:/config
+      - ./storage:/storage
+      - ./logs:/logs
+      - ./ftp_data:/ftp_data
+    environment:
+      - SETTINGS_PATH=/config/settings.json
+      - MASK_PATH=/config/mask.png
+      - STORAGE_ROOT=/storage/archive
+      - FTP_INCOMING=/ftp_data/incoming
+    depends_on:
+      ftp:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - snowjam-network
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    container_name: snowjam-nginx
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    volumes:
+      - ./storage:/storage:ro
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - snowjam-network
+
+  ftp:
+    image: delfer/alpine-ftp-server
+    container_name: snowjam-ftp
+    restart: unless-stopped
+    environment:
+      - USERS=ftpuser|ftpuser|/ftp_data/incoming
+      - ADDRESS=0.0.0.0
+    volumes:
+      - ./ftp_data:/ftp_data
+    ports:
+      - "21:21"
+      - "21000-21010:21000-21010"
+    networks:
+      - snowjam-network
+
+networks:
+  snowjam-network:
+    driver: bridge

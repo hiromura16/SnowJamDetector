@@ -1,0 +1,52 @@
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Python / backend
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+ENV/
+env/
+
+# Logs / runtime data
+logs/
+*.log
+storage/
+ftp_data/
+SamplePhoto/
+
+# Config files (may contain secrets)
+config/settings.json
+# マスク画像: サンプルとして含める（実際の環境固有のマスクは手動で除外するか、別名で管理）
+# config/mask.png  # コメントアウト: サンプルとして含める
+# config/mask.jpg  # コメントアウト: サンプルとして含める
+# config/mask.json # コメントアウト: サンプルとして含める
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Docker
+.dockerignore
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
